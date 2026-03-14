@@ -14,7 +14,7 @@ export function register() {
 /* -------------------------------------------- */
 
 /**
- * Roll type definitions. Each produces a "die" and "rollMode" setting.
+ * Roll type definitions. Each produces a "die" setting.
  */
 const ROLL_TYPES = [
   { key: "ability",        label: "CUSTOM_ROLLS.abilityCheck" },
@@ -25,14 +25,6 @@ const ROLL_TYPES = [
   { key: "skill",          label: "CUSTOM_ROLLS.skillCheck" },
   { key: "tool",           label: "CUSTOM_ROLLS.toolCheck" }
 ];
-
-const ROLL_MODE_CHOICES = {
-  default:    "CUSTOM_ROLLS.default",
-  blindroll:  "CHAT.RollBlind",
-  gmroll:     "CHAT.RollPrivate",
-  publicroll: "CHAT.RollPublic",
-  selfroll:   "CHAT.RollSelf"
-};
 
 const CRITICAL_RULE_CHOICES = {
   normal:    "CUSTOM_ROLLS.rolls.criticalRule.normal",
@@ -45,8 +37,6 @@ const APPLY_TO_CHOICES = {
   gm:      "CUSTOM_ROLLS.applyTo.gm",
   both:    "CUSTOM_ROLLS.applyTo.both"
 };
-
-const VALID_ROLL_MODES = ["publicroll", "gmroll", "blindroll", "selfroll"];
 
 /**
  * Register all inline settings.
@@ -63,27 +53,14 @@ function registerSettings() {
     requiresReload: true
   });
 
-  for ( const { key, label } of ROLL_TYPES ) {
-    const rollName = game.i18n.localize(label);
-
+  for ( const { key } of ROLL_TYPES ) {
     registerSetting(`${key}.die`, {
-      name: game.i18n.format("CUSTOM_ROLLS.setting.die.name", { roll: rollName }),
-      hint: game.i18n.format("CUSTOM_ROLLS.setting.die.hint", { roll: rollName }),
+      name: `CUSTOM_ROLLS.setting.${key}.die.name`,
+      hint: `CUSTOM_ROLLS.setting.${key}.die.hint`,
       scope: "world",
       config: true,
       type: String,
       default: "1d20",
-      requiresReload: true
-    });
-
-    registerSetting(`${key}.rollMode`, {
-      name: game.i18n.format("CUSTOM_ROLLS.setting.rollMode.name", { roll: rollName }),
-      hint: game.i18n.format("CUSTOM_ROLLS.setting.rollMode.hint", { roll: rollName }),
-      scope: "world",
-      config: true,
-      type: String,
-      default: "default",
-      choices: ROLL_MODE_CHOICES,
       requiresReload: true
     });
   }
@@ -123,8 +100,7 @@ function getRollSettings() {
   const rolls = {};
   for ( const { key } of ROLL_TYPES ) {
     rolls[key] = {
-      die: getSetting(`${key}.die`, "1d20"),
-      rollMode: getSetting(`${key}.rollMode`, "default")
+      die: getSetting(`${key}.die`, "1d20")
     };
   }
   rolls.attack.criticalRule = getSetting("attack.criticalRule", "normal");
@@ -149,8 +125,6 @@ function registerHooks() {
     if ( config.hookNames.includes("attack") ) {
       applyAttackCriticalRule(config.rolls[0].options, roll, getDieParts(roll.die));
     }
-
-    applyRollMode(message, roll);
   });
 
   Hooks.on("renderChatMessage", highlightAlternativeCriticalChat);
@@ -170,14 +144,14 @@ function resolveRoll(config, rolls) {
   if ( hookNames.includes("initiativeDialog") ) return rolls.initiative;
   if ( hookNames.includes("attack") )           return rolls.attack;
   if ( hookNames.includes("skill") ) {
-    return { ...rolls.skill, rollMode: CONFIG.DND5E?.skills[config.skill]?.rollMode ?? rolls.skill.rollMode };
+    return { ...rolls.skill };
   }
   if ( hookNames.includes("tool") )             return rolls.tool;
   if ( hookNames.includes("AbilityCheck") ) {
-    return { ...rolls.ability, rollMode: CONFIG.DND5E?.abilities[config.ability]?.rollMode ?? rolls.ability.rollMode };
+    return { ...rolls.ability };
   }
   if ( hookNames.includes("SavingThrow") ) {
-    return { ...rolls.savingThrow, rollMode: CONFIG.DND5E?.abilities[config.ability]?.rollMode ?? rolls.savingThrow.rollMode };
+    return { ...rolls.savingThrow };
   }
   return null;
 }
@@ -195,17 +169,6 @@ function applyCustomDie(config, roll) {
   options.customDie = roll.die;
   options.criticalSuccess = dieParts.number * dieParts.faces;
   options.criticalFailure = dieParts.number;
-}
-
-/**
- * Apply the effective roll mode to the chat message.
- * @param {object} message The chat message data
- * @param {object} roll The roll settings
- */
-function applyRollMode(message, roll) {
-  if ( VALID_ROLL_MODES.includes(roll.rollMode) ) {
-    message.rollMode = roll.rollMode;
-  }
 }
 
 /* -------------------------------------------- */
