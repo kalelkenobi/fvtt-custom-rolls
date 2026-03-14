@@ -40,12 +40,29 @@ const CRITICAL_RULE_CHOICES = {
   window:    "CUSTOM_ROLLS.rolls.criticalRule.window"
 };
 
+const APPLY_TO_CHOICES = {
+  players: "CUSTOM_ROLLS.applyTo.players",
+  gm:      "CUSTOM_ROLLS.applyTo.gm",
+  both:    "CUSTOM_ROLLS.applyTo.both"
+};
+
 const VALID_ROLL_MODES = ["publicroll", "gmroll", "blindroll", "selfroll"];
 
 /**
  * Register all inline settings.
  */
 function registerSettings() {
+  registerSetting("applyTo", {
+    name: game.i18n.localize("CUSTOM_ROLLS.setting.applyTo.name"),
+    hint: game.i18n.localize("CUSTOM_ROLLS.setting.applyTo.hint"),
+    scope: "world",
+    config: true,
+    type: String,
+    default: "players",
+    choices: APPLY_TO_CHOICES,
+    requiresReload: true
+  });
+
   for ( const { key, label } of ROLL_TYPES ) {
     const rollName = game.i18n.localize(label);
 
@@ -120,7 +137,9 @@ function getRollSettings() {
  */
 function registerHooks() {
   Hooks.on("dnd5e.preRollV2", (config, dialog, message) => {
-    if ( game.user.isGM ) return;
+    const applyTo = getSetting("applyTo", "players");
+    if ( applyTo === "players" && game.user.isGM ) return;
+    if ( applyTo === "gm" && !game.user.isGM ) return;
 
     const roll = resolveRoll(config, getRollSettings());
     if ( !roll ) return;

@@ -1,5 +1,8 @@
 {
     "CUSTOM_ROLLS.abilityCheck": "Ability Check",
+    "CUSTOM_ROLLS.applyTo.both": "Both Players and GM",
+    "CUSTOM_ROLLS.applyTo.gm": "GM Only",
+    "CUSTOM_ROLLS.applyTo.players": "Players Only",
     "CUSTOM_ROLLS.attackRoll": "Attack Roll",
     "CUSTOM_ROLLS.concentrationSavingThrow": "Concentration Saving Throw",
     "CUSTOM_ROLLS.default": "Default",
@@ -9,6 +12,8 @@
     "CUSTOM_ROLLS.rolls.criticalRule.normal": "Normal Behaviour",
     "CUSTOM_ROLLS.rolls.criticalRule.window": "Increase Critical Window",
     "CUSTOM_ROLLS.savingThrow": "Saving Throw",
+    "CUSTOM_ROLLS.setting.applyTo.hint": "Choose whether custom rolls apply to players, the GM, or both.",
+    "CUSTOM_ROLLS.setting.applyTo.name": "Apply To",
     "CUSTOM_ROLLS.setting.criticalLowerBound.hint": "The minimum total required to score a critical hit when using the 'Increase Critical Window' rule.",
     "CUSTOM_ROLLS.setting.criticalLowerBound.name": "Attack Roll – Critical Hit Lower Bound",
     "CUSTOM_ROLLS.setting.criticalRule.hint": "Alternative critical hit rule for attack rolls (only applies when using 2d10).",
