@@ -19,9 +19,6 @@
   "esmodules": [
     "scripts/module.js"
   ],
-  "styles": [
-    "styles/custom-rolls.css"
-  ],
   "languages": [
     {
       "lang": "en",

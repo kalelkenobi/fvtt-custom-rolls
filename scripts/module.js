@@ -1,4 +1,4 @@
-import { CONSTANTS, MODULE } from "./constants.js";
+import { CONSTANTS } from "./constants.js";
 import { registerSetting } from "./utils.js";
 import { register as registerRolls } from "./rolls.js";
 import { patchD20Die } from "./patches/d20-die.js";

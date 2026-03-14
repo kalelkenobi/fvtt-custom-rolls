@@ -1,58 +1,131 @@
 import { CONSTANTS } from "./constants.js";
 import { clampAttackCriticalLowerBound, isEqualDiceCriticalRoll, isWindowCriticalRoll } from "./critical-rules.js";
-import { c5eLoadTemplates, getDieParts, getSetting, registerMenu, registerSetting } from "./utils.js";
-import { RollsForm } from "./forms/rolls-form.js";
-
-const constants = CONSTANTS.ROLLS;
+import { getDieParts, getSetting, registerSetting } from "./utils.js";
 
 /**
- * Register settings and hooks, and load templates.
+ * Register settings and hooks.
  */
 export function register() {
   registerSettings();
   registerHooks();
-
-  const templates = [constants.TEMPLATE.FORM];
-  c5eLoadTemplates(templates);
 }
 
 /* -------------------------------------------- */
 
 /**
- * Register settings.
+ * Setting definitions for each roll type.
+ * Each entry produces two Foundry settings: "<key>.die" and "<key>.rollMode".
+ * Attack rolls additionally get "attack.criticalRule" and "attack.criticalLowerBound".
+ */
+const ROLL_TYPES = [
+  { key: "ability",        label: "CUSTOM_ROLLS.abilityCheck" },
+  { key: "attack",         label: "CUSTOM_ROLLS.attackRoll" },
+  { key: "concentration",  label: "CUSTOM_ROLLS.concentrationSavingThrow" },
+  { key: "initiative",     label: "CUSTOM_ROLLS.initiativeRoll" },
+  { key: "savingThrow",    label: "CUSTOM_ROLLS.savingThrow" },
+  { key: "skill",          label: "CUSTOM_ROLLS.skillCheck" },
+  { key: "tool",           label: "CUSTOM_ROLLS.toolCheck" }
+];
+
+const ROLL_MODE_CHOICES = {
+  default:    "CUSTOM_ROLLS.default",
+  blindroll:  "CHAT.RollBlind",
+  gmroll:     "CHAT.RollPrivate",
+  publicroll: "CHAT.RollPublic",
+  selfroll:   "CHAT.RollSelf"
+};
+
+const CRITICAL_RULE_CHOICES = {
+  normal:    "CUSTOM_ROLLS.rolls.criticalRule.normal",
+  equalDice: "CUSTOM_ROLLS.rolls.criticalRule.equalDice",
+  window:    "CUSTOM_ROLLS.rolls.criticalRule.window"
+};
+
+/* -------------------------------------------- */
+
+/**
+ * Register all inline settings.
  */
 function registerSettings() {
-  registerMenu(
-    constants.MENU.KEY,
+  for ( const { key, label } of ROLL_TYPES ) {
+    // Die setting
+    registerSetting(
+      `${key}.die`,
+      {
+        name: game.i18n.format("CUSTOM_ROLLS.setting.die.name", { roll: game.i18n.localize(label) }),
+        hint: game.i18n.format("CUSTOM_ROLLS.setting.die.hint", { roll: game.i18n.localize(label) }),
+        scope: "world",
+        config: true,
+        type: String,
+        default: "1d20",
+        requiresReload: true
+      }
+    );
+
+    // Roll mode setting
+    registerSetting(
+      `${key}.rollMode`,
+      {
+        name: game.i18n.format("CUSTOM_ROLLS.setting.rollMode.name", { roll: game.i18n.localize(label) }),
+        hint: game.i18n.format("CUSTOM_ROLLS.setting.rollMode.hint", { roll: game.i18n.localize(label) }),
+        scope: "world",
+        config: true,
+        type: String,
+        default: "default",
+        choices: ROLL_MODE_CHOICES,
+        requiresReload: true
+      }
+    );
+  }
+
+  // Attack-specific: Critical Hit Rule
+  registerSetting(
+    "attack.criticalRule",
     {
-      hint: game.i18n.localize(constants.MENU.HINT),
-      label: game.i18n.localize(constants.MENU.LABEL),
-      name: game.i18n.localize(constants.MENU.NAME),
-      icon: constants.MENU.ICON,
-      type: RollsForm,
-      restricted: true,
+      name: game.i18n.localize("CUSTOM_ROLLS.setting.criticalRule.name"),
+      hint: game.i18n.localize("CUSTOM_ROLLS.setting.criticalRule.hint"),
       scope: "world",
+      config: true,
+      type: String,
+      default: "normal",
+      choices: CRITICAL_RULE_CHOICES,
       requiresReload: true
     }
   );
 
+  // Attack-specific: Critical Hit Lower Bound
   registerSetting(
-    constants.SETTING.ROLLS.KEY,
+    "attack.criticalLowerBound",
     {
+      name: game.i18n.localize("CUSTOM_ROLLS.setting.criticalLowerBound.name"),
+      hint: game.i18n.localize("CUSTOM_ROLLS.setting.criticalLowerBound.hint"),
       scope: "world",
-      config: false,
-      type: Object,
-      default: {
-        ability: { die: "1d20", rollMode: "default" },
-        attack: getDefaultAttackRollSettings(),
-        concentration: { die: "1d20", rollMode: "default" },
-        initiative: { die: "1d20", rollMode: "default" },
-        savingThrow: { die: "1d20", rollMode: "default" },
-        skill: { die: "1d20", rollMode: "default" },
-        tool: { die: "1d20", rollMode: "default" }
-      }
+      config: true,
+      type: Number,
+      default: 19,
+      range: { min: 1, max: 19, step: 1 },
+      requiresReload: true
     }
   );
+}
+
+/* -------------------------------------------- */
+
+/**
+ * Build a rolls object from individual settings for use in the hook.
+ * @returns {object} The collected roll settings
+ */
+function getRollSettings() {
+  const rolls = {};
+  for ( const { key } of ROLL_TYPES ) {
+    rolls[key] = {
+      die: getSetting(`${key}.die`, "1d20"),
+      rollMode: getSetting(`${key}.rollMode`, "default")
+    };
+  }
+  rolls.attack.criticalRule = getSetting("attack.criticalRule", "normal");
+  rolls.attack.criticalLowerBound = getSetting("attack.criticalLowerBound", 19);
+  return rolls;
 }
 
 /* -------------------------------------------- */
@@ -63,7 +136,7 @@ function registerSettings() {
 function registerHooks() {
   Hooks.on("dnd5e.preRollV2", (config, dialog, message) => {
     const hookNames = config.hookNames;
-    const rolls = getSetting(constants.SETTING.ROLLS.KEY);
+    const rolls = getRollSettings();
 
     let roll = null;
     let rollMode = null;
@@ -76,13 +149,8 @@ function registerHooks() {
       roll = rolls.initiative;
     } else if ( hookNames.includes("attack") ) {
       isAttackRoll = true;
-      const weaponType = config?.subject?.item?.system?.type?.value;
-      roll = (rolls.weaponTypes?.[weaponType]?.die)
-        ? rolls.weaponTypes[weaponType]
-        : rolls.attack;
-      rollMode = (rolls.weaponTypes?.[weaponType]?.rollMode && rolls.weaponTypes?.[weaponType]?.rollMode !== "default")
-        ? rolls.weaponTypes[weaponType].rollMode
-        : rolls.attack.rollMode;
+      roll = rolls.attack;
+      rollMode = rolls.attack.rollMode;
     } else if ( hookNames.includes("skill") ) {
       roll = rolls.skill;
       rollMode = CONFIG.DND5E?.skills[config.skill]?.rollMode;
@@ -120,21 +188,6 @@ function registerHooks() {
 
   Hooks.on("renderChatMessage", highlightAlternativeCriticalChat);
   Hooks.on("renderChatMessageHTML", highlightAlternativeCriticalChat);
-}
-
-/* -------------------------------------------- */
-
-/**
- * Get default attack roll settings.
- * @returns {object} The default attack roll settings
- */
-function getDefaultAttackRollSettings() {
-  return {
-    die: "1d20",
-    rollMode: "default",
-    criticalRule: "normal",
-    criticalLowerBound: 19
-  };
 }
 
 /* -------------------------------------------- */
@@ -247,20 +300,6 @@ function injectCriticalIcons(total) {
  * @returns {boolean} Whether custom roll settings are applied
  */
 export function isCustomRoll() {
-  const rolls = getSetting(constants.SETTING.ROLLS.KEY);
-
-  if ( !rolls ) return false;
-
-  const customRolls = [
-    rolls.ability?.die,
-    rolls.attack?.die,
-    rolls.concentration?.die,
-    rolls.initiative?.die,
-    rolls.savingThrow?.die,
-    rolls.skill?.die,
-    rolls.tool?.die,
-    ...Object.values(rolls.weaponTypes ?? {}).map(weaponType => weaponType?.die)
-  ];
-
-  return customRolls.some(die => die && die !== "1d20");
+  const customDice = ROLL_TYPES.map(({ key }) => getSetting(`${key}.die`, "1d20"));
+  return customDice.some(die => die && die !== "1d20");
 }
