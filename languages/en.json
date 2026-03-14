@@ -3,10 +3,7 @@
     "CUSTOM_ROLLS.attackRoll": "Attack Roll",
     "CUSTOM_ROLLS.concentrationSavingThrow": "Concentration Saving Throw",
     "CUSTOM_ROLLS.default": "Default",
-    "CUSTOM_ROLLS.dialog.reset.content": "Are you sure you want to reset?",
-    "CUSTOM_ROLLS.dialog.reset.title": "Reset",
     "CUSTOM_ROLLS.initiativeRoll": "Initiative Roll",
-    "CUSTOM_ROLLS.no": "No",
     "CUSTOM_ROLLS.rollMode": "Roll Mode",
     "CUSTOM_ROLLS.rolls.criticalRule.equalDice": "Equal Dice Results",
     "CUSTOM_ROLLS.rolls.criticalRule.normal": "Normal Behaviour",
@@ -21,6 +18,5 @@
     "CUSTOM_ROLLS.setting.rollMode.hint": "Default roll mode for {roll}.",
     "CUSTOM_ROLLS.setting.rollMode.name": "{roll} – Roll Mode",
     "CUSTOM_ROLLS.skillCheck": "Skill Check",
-    "CUSTOM_ROLLS.toolCheck": "Tool Check",
-    "CUSTOM_ROLLS.yes": "Yes"
+    "CUSTOM_ROLLS.toolCheck": "Tool Check"
 }
