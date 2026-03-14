@@ -6,7 +6,7 @@ A Foundry VTT module to customise dice rolls for the D&D 5e system.
 
 ### Configure Rolls
 
-Customize the base die and roll mode for:
+Customize the base die for:
 
 - **Ability Checks**
 - **Attack Rolls** (with custom critical hit rules)
@@ -15,10 +15,6 @@ Customize the base die and roll mode for:
 - **Saving Throws**
 - **Skill Checks**
 - **Tool Checks**
-
-### Per-Weapon Type Configuration
-
-Configure different dice and roll modes for each weapon type (e.g., simple melee, martial ranged), including per-weapon-type critical hit rules.
 
 ### Alternative Critical Hit Rules (2d10)
 
