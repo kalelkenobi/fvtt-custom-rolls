@@ -1,13 +1,6 @@
-import { MODULE } from "./constants.js";
+import { MODULE, getDieParts, registerSetting, clampAttackCriticalLowerBound, getActiveD20Results,
+  is2d10DieFormula, isEqualDiceCriticalRoll, isWindowCriticalRoll } from "./utils.js";
 import { register as registerRolls, isCustomRoll } from "./rolls.js";
-import { getDieParts, registerSetting } from "./utils.js";
-import {
-  clampAttackCriticalLowerBound,
-  getActiveD20Results,
-  is2d10DieFormula,
-  isEqualDiceCriticalRoll,
-  isWindowCriticalRoll
-} from "./critical-rules.js";
 
 /**
  * Initialize the module and register settings, hooks, and patches.

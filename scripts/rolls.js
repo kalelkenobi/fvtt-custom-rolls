@@ -1,6 +1,5 @@
-import { MODULE } from "./constants.js";
-import { clampAttackCriticalLowerBound, isEqualDiceCriticalRoll, isWindowCriticalRoll } from "./critical-rules.js";
-import { getDieParts, getSetting, registerSetting } from "./utils.js";
+import { MODULE, clampAttackCriticalLowerBound, isEqualDiceCriticalRoll, isWindowCriticalRoll,
+  getDieParts, getSetting, registerSetting } from "./utils.js";
 
 /**
  * Register settings and hooks.
