@@ -18,12 +18,12 @@ export function register() {
  */
 const ROLL_TYPES = [
   { key: "ability",        label: "CUSTOM_ROLLS.abilityCheck" },
-  { key: "attack",         label: "CUSTOM_ROLLS.attackRoll" },
   { key: "concentration",  label: "CUSTOM_ROLLS.concentrationSavingThrow" },
   { key: "initiative",     label: "CUSTOM_ROLLS.initiativeRoll" },
   { key: "savingThrow",    label: "CUSTOM_ROLLS.savingThrow" },
   { key: "skill",          label: "CUSTOM_ROLLS.skillCheck" },
-  { key: "tool",           label: "CUSTOM_ROLLS.toolCheck" }
+  { key: "tool",           label: "CUSTOM_ROLLS.toolCheck" },
+  { key: "attack",         label: "CUSTOM_ROLLS.attackRoll" }
 ];
 
 const CRITICAL_RULE_CHOICES = {
