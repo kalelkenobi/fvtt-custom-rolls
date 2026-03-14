@@ -1,5 +1,5 @@
 import { MODULE, clampAttackCriticalLowerBound, isEqualDiceCriticalRoll, isWindowCriticalRoll,
-  getDieParts, getSetting, registerSetting, is2d10DieFormula } from "./utils.js";
+  getDieParts, getSetting, registerSetting } from "./utils.js";
 
 /**
  * Register settings and hooks.
@@ -129,7 +129,6 @@ function registerHooks() {
 
   Hooks.on("renderChatMessage", highlightAlternativeCriticalChat);
   Hooks.on("renderChatMessageHTML", highlightAlternativeCriticalChat);
-  Hooks.on("renderSettingsConfig", onRenderSettingsConfig);
 }
 
 /**
@@ -264,36 +263,6 @@ function injectCriticalIcons(total) {
   }
 
   total.append(icons);
-}
-
-/**
- * Handle rendering of the SettingsConfig application to enforce constraints.
- * @param {SettingsConfig} app The application
- * @param {HTMLElement|jQuery} html The HTML element
- */
-function onRenderSettingsConfig(app, html) {
-  const root = html?.[0] ?? html;
-  if ( !root?.querySelector ) return;
-
-  const attackDieInput = root.querySelector(`input[name="${MODULE.ID}.attack.die"]`);
-  const critRuleSelect = root.querySelector(`select[name="${MODULE.ID}.attack.criticalRule"]`);
-
-  if ( !attackDieInput || !critRuleSelect ) return;
-
-  const equalDiceOption = critRuleSelect.querySelector(`option[value="equalDice"]`);
-  if ( !equalDiceOption ) return;
-
-  const updateCritRuleChoices = () => {
-    const is2d10 = is2d10DieFormula(attackDieInput.value);
-    equalDiceOption.disabled = !is2d10;
-
-    if ( !is2d10 && critRuleSelect.value === "equalDice" ) {
-      critRuleSelect.value = "normal";
-    }
-  };
-
-  updateCritRuleChoices();
-  attackDieInput.addEventListener("input", updateCritRuleChoices);
 }
 
 /* -------------------------------------------- */
