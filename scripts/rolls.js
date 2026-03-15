@@ -127,7 +127,6 @@ function registerHooks() {
     }
   });
 
-  Hooks.on("renderChatMessage", highlightAlternativeCriticalChat);
   Hooks.on("renderChatMessageHTML", highlightAlternativeCriticalChat);
   Hooks.on("renderSettingsConfig", onRenderSettingsConfig);
 }
