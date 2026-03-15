@@ -1,5 +1,5 @@
-import { MODULE, clampAttackCriticalLowerBound, isEqualDiceCriticalRoll, isWindowCriticalRoll,
-  getDieParts, getSetting, registerSetting } from "./utils.js";
+import { MODULE, clampAttackCriticalLowerBound, is2d10DieFormula, isEqualDiceCriticalRoll,
+  isWindowCriticalRoll, getDieParts, getSetting, registerSetting } from "./utils.js";
 
 /**
  * Register settings and hooks.
@@ -129,6 +129,7 @@ function registerHooks() {
 
   Hooks.on("renderChatMessage", highlightAlternativeCriticalChat);
   Hooks.on("renderChatMessageHTML", highlightAlternativeCriticalChat);
+  Hooks.on("renderSettingsConfig", onRenderSettingsConfig);
 }
 
 /**
@@ -263,6 +264,49 @@ function injectCriticalIcons(total) {
   }
 
   total.append(icons);
+}
+
+/* -------------------------------------------- */
+/*  Settings Config UI                          */
+/* -------------------------------------------- */
+
+/**
+ * Toggle visibility of the "equalDice" critical rule option based on the attack die.
+ * @param {Application} app The settings config application
+ * @param {HTMLElement|jQuery} html The rendered HTML
+ */
+function onRenderSettingsConfig(app, html) {
+  const root = html?.[0]?.form ?? html.form;
+  if ( !root?.querySelector ) return;
+
+  const dieInput = root.querySelector(`[name="${MODULE.ID}.attack.die"]`);
+  const ruleSelect = root.querySelector(`[name="${MODULE.ID}.attack.criticalRule"]`);
+  if ( !dieInput || !ruleSelect ) return;
+
+  /**
+   * Show or hide the equalDice option based on the current die value.
+   * @param {string} dieValue The current die formula
+   */
+  function toggleEqualDiceOption(dieValue) {
+    const option = ruleSelect.querySelector('option[value="equalDice"]');
+    if ( !option ) return;
+
+    const allowed = is2d10DieFormula(dieValue);
+    option.hidden = !allowed;
+    option.disabled = !allowed;
+
+    // If equalDice is selected but no longer allowed, reset to "normal".
+    if ( !allowed && ruleSelect.value === "equalDice" ) {
+      ruleSelect.value = "normal";
+    }
+  }
+
+  // Set initial state.
+  toggleEqualDiceOption(dieInput.value);
+
+  // React when the attack die input changes.
+  dieInput.addEventListener("change", () => toggleEqualDiceOption(dieInput.value));
+  dieInput.addEventListener("input", () => toggleEqualDiceOption(dieInput.value));
 }
 
 /* -------------------------------------------- */
