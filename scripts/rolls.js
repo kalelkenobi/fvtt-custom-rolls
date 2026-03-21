@@ -49,8 +49,7 @@ function registerSettings() {
     config: true,
     type: String,
     default: "players",
-    choices: APPLY_TO_CHOICES,
-    requiresReload: true
+    choices: APPLY_TO_CHOICES
   });
 
   for ( const { key } of ROLL_TYPES ) {
@@ -61,7 +60,7 @@ function registerSettings() {
       config: true,
       type: String,
       default: "1d20",
-      requiresReload: true
+      onChange: () => Hooks.callAll("customRollsDieChanged")
     });
   }
 
@@ -72,8 +71,7 @@ function registerSettings() {
     config: true,
     type: String,
     default: "normal",
-    choices: CRITICAL_RULE_CHOICES,
-    requiresReload: true
+    choices: CRITICAL_RULE_CHOICES
   });
 
   registerSetting("attack.criticalLowerBound", {
@@ -83,8 +81,7 @@ function registerSettings() {
     config: true,
     type: Number,
     default: 19,
-    range: { min: 1, max: 19, step: 1 },
-    requiresReload: true
+    range: { min: 1, max: 19, step: 1 }
   });
 }
 

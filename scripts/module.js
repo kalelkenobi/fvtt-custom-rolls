@@ -2,6 +2,18 @@ import { MODULE, getDieParts, registerSetting, clampAttackCriticalLowerBound, ge
   is2d10DieFormula, isEqualDiceCriticalRoll, isWindowCriticalRoll } from "./utils.js";
 import { register as registerRolls, isCustomRoll } from "./rolls.js";
 
+let isPatched = false;
+
+/**
+ * Apply libWrapper patches if they haven't been applied yet.
+ */
+function ensurePatched() {
+  if ( isPatched ) return;
+  patchD20Die();
+  patchD20Roll();
+  isPatched = true;
+}
+
 /**
  * Initialize the module and register settings, hooks, and patches.
  */
@@ -16,10 +28,11 @@ Hooks.on("init", async () => {
   registerRolls();
 
   if ( isCustomRoll() ) {
-    patchD20Die();
-    patchD20Roll();
+    ensurePatched();
   }
 });
+
+Hooks.on("customRollsDieChanged", ensurePatched);
 
 /* ============================================ */
 /*  D20Die Patch                                */
