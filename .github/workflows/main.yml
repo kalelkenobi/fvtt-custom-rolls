@@ -36,9 +36,9 @@ jobs:
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           if [ -z "$PREV_TAG" ]; then
-            NOTES=$(git log --pretty=format:"- %s")
+            NOTES=$(git log HEAD^ --pretty=format:"- %s")
           else
-            NOTES=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s")
+            NOTES=$(git log ${PREV_TAG}..HEAD^ --pretty=format:"- %s")
           fi
           {
             echo "notes<<EOF"
